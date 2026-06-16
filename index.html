@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teleprompter – Script Reader</title>
+  <meta name="description" content="Generate scripts with AI, read while you record, and deliver every video with confidence. Free on Android." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #FD5E01;
+      --orange-soft: rgba(253,94,1,0.12);
+      --orange-mid: rgba(253,94,1,0.25);
+      --ink: #0A0A0A;
+      --ink-2: #444444;
+      --ink-3: #888888;
+      --surface: #FFFFFF;
+      --surface-2: #F7F7F7;
+      --surface-3: #F0F0F0;
+      --border: rgba(0,0,0,0.09);
+      --border-2: rgba(0,0,0,0.06);
+      --radius: 14px;
+      --font: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--surface);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 40px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-img {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .nav-brand-text {
+      display: flex; flex-direction: column;
+      line-height: 1.1;
+    }
+    .nav-brand-name {
+      font-size: 17px; font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.2px;
+    }
+    .nav-brand-sub {
+      font-size: 10px; font-weight: 500;
+      color: var(--ink-3);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .nav-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--orange); color: #fff;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 100px;
+      font-size: 13px; font-weight: 600;
+      transition: opacity 0.15s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+    .nav-cta svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 130px 24px 80px;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(253,94,1,0.07) 0%, transparent 70%);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--orange-soft);
+      color: var(--orange);
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      padding: 7px 16px; border-radius: 100px;
+      margin-bottom: 32px;
+      border: 1px solid var(--orange-mid);
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px;
+      background: var(--orange);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.7); }
+    }
+    h1 {
+      font-size: clamp(38px, 6.5vw, 74px);
+      font-weight: 800;
+      line-height: 1.04;
+      letter-spacing: -2.5px;
+      color: var(--ink);
+      max-width: 800px;
+      margin-bottom: 22px;
+    }
+    h1 em {
+      font-style: normal;
+      color: var(--orange);
+    }
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 19px);
+      color: var(--ink-2);
+      line-height: 1.65;
+      max-width: 500px;
+      margin-bottom: 40px;
+      font-weight: 400;
+    }
+    .hero-actions {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 52px;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--orange); color: #fff;
+      text-decoration: none;
+      padding: 15px 28px; border-radius: 100px;
+      font-size: 15px; font-weight: 700;
+      transition: transform 0.15s, opacity 0.15s;
+      box-shadow: 0 4px 20px rgba(253,94,1,0.30);
+    }
+    .btn-primary:hover { transform: translateY(-2px); opacity: 0.92; }
+    .btn-primary svg { width: 19px; height: 19px; flex-shrink: 0; }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--ink-2);
+      text-decoration: none;
+      padding: 15px 22px;
+      font-size: 15px; font-weight: 500;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-ghost:hover { background: var(--surface-2); border-color: rgba(0,0,0,0.15); }
+
+
+
+    /* ── TICKER ── */
+    .ticker-wrap {
+      overflow: hidden;
+      padding: 18px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+      background: var(--surface-2);
+    }
+    .ticker {
+      display: flex; gap: 40px;
+      animation: ticker 22s linear infinite;
+      width: max-content;
+    }
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 600;
+      color: var(--ink-3);
+      white-space: nowrap;
+      letter-spacing: 0.01em;
+    }
+    .ticker-item svg { width: 15px; height: 15px; color: var(--orange); flex-shrink: 0; }
+
+    /* ── SECTIONS ── */
+    .section { padding: 90px 24px; max-width: 1080px; margin: 0 auto; }
+    .section-label {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: clamp(26px, 3.8vw, 42px);
+      font-weight: 800; letter-spacing: -1.2px;
+      line-height: 1.1; margin-bottom: 48px;
+      max-width: 520px; color: var(--ink);
+    }
+
+    /* ── FEATURES GRID ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .feat-card {
+      background: var(--surface);
+      padding: 30px 26px;
+      transition: background 0.18s;
+    }
+    .feat-card:hover { background: #FFF8F4; }
+    .feat-icon {
+      width: 42px; height: 42px;
+      background: var(--orange-soft);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .feat-icon svg { width: 20px; height: 20px; color: var(--orange); }
+    .feat-title { font-weight: 700; font-size: 15px; margin-bottom: 7px; color: var(--ink); }
+    .feat-desc { font-size: 14px; line-height: 1.65; color: var(--ink-2); }
+
+    /* ── HOW IT WORKS ── */
+    .how-section {
+      background: var(--ink);
+      padding: 90px 24px;
+    }
+    .how-inner { max-width: 1080px; margin: 0 auto; }
+    .how-section .section-label { color: var(--orange); }
+    .how-section .section-title { color: #fff; }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 48px;
+      margin-top: 52px;
+    }
+    .step-num {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .step-num::after {
+      content: '';
+      height: 1px; flex: 1;
+      background: rgba(253,94,1,0.25);
+    }
+    .step-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+    .step-desc { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.45); }
+
+    /* ── USE CASES ── */
+    .usecases-grid {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-top: 40px;
+    }
+    .usecase-pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 10px 18px; border-radius: 100px;
+      font-size: 14px; font-weight: 500;
+      color: var(--ink-2);
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .usecase-pill:hover {
+      background: var(--orange-soft);
+      border-color: var(--orange-mid);
+      color: var(--orange);
+    }
+    .usecase-pill svg { width: 15px; height: 15px; color: var(--orange); }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: var(--ink);
+      padding: 100px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 50% 100%, rgba(253,94,1,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-section h2 {
+      font-size: clamp(30px, 5vw, 54px);
+      font-weight: 800; letter-spacing: -1.5px;
+      line-height: 1.05; margin-bottom: 18px;
+      color: #fff; position: relative;
+    }
+    .cta-section p {
+      color: rgba(255,255,255,0.5); font-size: 17px;
+      max-width: 400px; margin: 0 auto 36px;
+      line-height: 1.6; position: relative;
+    }
+    .store-badge {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: var(--orange); color: #fff;
+      text-decoration: none;
+      padding: 14px 26px; border-radius: var(--radius);
+      transition: transform 0.15s, opacity 0.15s;
+      box-shadow: 0 6px 28px rgba(253,94,1,0.4);
+      position: relative;
+    }
+    .store-badge:hover { transform: translateY(-2px); opacity: 0.92; }
+    .store-badge-text { text-align: left; }
+    .store-badge-text small { display: block; font-size: 10px; opacity: 0.75; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+    .store-badge-text strong { font-size: 16px; font-weight: 700; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 26px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      background: var(--surface);
+    }
+    footer p { font-size: 13px; color: var(--ink-3); }
+    footer a { color: var(--ink-3); text-decoration: none; font-size: 13px; transition: color 0.15s; }
+    footer a:hover { color: var(--orange); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 14px 18px; }
+      .nav-brand-sub { display: none; }
+      .section, .cta-section { padding: 60px 20px; }
+      .how-section { padding: 60px 20px; }
+      footer { padding: 22px 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps-grid { gap: 36px; }
+
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ticker { animation: none; }
+      .hero-badge-dot { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-brand">
+      <img src="logo.png" alt="Teleprompter app icon" class="nav-logo-img" />
+      <div class="nav-brand-text">
+        <span class="nav-brand-name">Teleprompter</span>
+        <span class="nav-brand-sub">Script Reader</span>
+      </div>
+    </a>
+    <a href="https://play.google.com/store/apps/details?id=com.ai.teleprompter.videoeditor.aiscript.generator" class="nav-cta" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.31.17.67.19 1 .07l13.06-7.57-2.9-2.9-11.16 10.4zm-1.08-20.7c-.07.21-.1.44-.1.67v16.54c0 .23.03.46.1.67l.07.06 9.26-9.27v-.21l-9.26-9.27-.07.06zm19.58 8.93-2.61-1.52-2.93 2.93 2.93 2.93 2.63-1.52c.75-.44.75-1.39-.02-1.82zM4.18.17l13.06 7.57-2.9 2.9L4.08.24l.1-.07z"/></svg>
+      Get on Google Play
+    </a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Free on Android
+    </div>
+    <h1>Read your script.<br /><em>Nail every take.</em></h1>
+    <p class="hero-sub">
+      Generate scripts with AI, read while you record, and deliver every video with full confidence — no retakes, no hesitation.
+    </p>
+    <div class="hero-actions">
+      <a href="https://play.google.com/store/apps/details?id=com.ai.teleprompter.videoeditor.aiscript.generator" class="btn-primary" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.31.17.67.19 1 .07l13.06-7.57-2.9-2.9-11.16 10.4zm-1.08-20.7c-.07.21-.1.44-.1.67v16.54c0 .23.03.46.1.67l.07.06 9.26-9.27v-.21l-9.26-9.27-.07.06zm19.58 8.93-2.61-1.52-2.93 2.93 2.93 2.93 2.63-1.52c.75-.44.75-1.39-.02-1.82zM4.18.17l13.06 7.57-2.9 2.9L4.08.24l.1-.07z"/></svg>
+        Download — it's free
+      </a>
+      <a href="#features" class="btn-ghost">See features ↓</a>
+    </div>
+
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker-wrap">
+    <div class="ticker" aria-hidden="true">
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>AI Script Generation</span>
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>Record While Reading</span>
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg>Speech to Text</span>
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Adjustable Scroll Speed</span>
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Script History</span>
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>Video Trimmer</span>
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>AI Script Generation</span>
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>Record While Reading</span>
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg>Speech to Text</span>
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Adjustable Scroll Speed</span>
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>Script History</span>
+      <span class="ticker-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>Video Trimmer</span>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <p class="section-label">What it does</p>
+    <h2 class="section-title">Everything you need to speak on camera</h2>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+        <p class="feat-title">AI script writer</p>
+        <p class="feat-desc">Describe your topic and let the AI generate a full, ready-to-read script in seconds. Works for any niche or format.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg></div>
+        <p class="feat-title">Voice to script</p>
+        <p class="feat-desc">Speak your ideas and watch them convert to a polished script in real time — no typing required.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <p class="feat-title">Read while you record</p>
+        <p class="feat-desc">Your script scrolls on screen while the camera runs. Look natural, sound prepared, every single time.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div>
+        <p class="feat-title">Adjustable scroll speed</p>
+        <p class="feat-desc">Speed up, slow down, or pause on the fly. The app adapts to your natural speaking pace — not the other way around.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg></div>
+        <p class="feat-title">Built-in video trimmer</p>
+        <p class="feat-desc">Clip and clean your recordings without leaving the app. Record, trim, and export in one seamless workflow.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg></div>
+        <p class="feat-title">Script history</p>
+        <p class="feat-desc">Every script and recording is saved and editable. Revisit, refine, and reuse your content anytime.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div class="how-inner">
+      <p class="section-label">How it works</p>
+      <h2 class="section-title">Three steps from idea to published video</h2>
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-num">Step 01</div>
+          <p class="step-title">Generate your script</p>
+          <p class="step-desc">Type a topic, speak your ideas, or paste your own text. The AI handles writing, structure, and tone.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">Step 02</div>
+          <p class="step-title">Read & record</p>
+          <p class="step-desc">Your script scrolls while you record. Adjust font size and speed until delivery feels completely natural.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">Step 03</div>
+          <p class="step-title">Trim & share</p>
+          <p class="step-desc">Cut the rough edges right inside the app, then export and post wherever your audience lives.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section class="section">
+    <p class="section-label">Who it's for</p>
+    <h2 class="section-title">Built for anyone who speaks on camera</h2>
+    <div class="usecases-grid">
+      <span class="usecase-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>YouTubers & vloggers</span>
+      <span class="usecase-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>Corporate presenters</span>
+      <span class="usecase-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Online educators</span>
+      <span class="usecase-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>Podcast hosts</span>
+      <span class="usecase-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Social media creators</span>
+      <span class="usecase-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>Journalists & reporters</span>
+      <span class="usecase-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Public speakers</span>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Start your first video today</h2>
+    <p>Free to download. No account needed. Just open and record.</p>
+    <a href="https://play.google.com/store/apps/details?id=com.ai.teleprompter.videoeditor.aiscript.generator" class="store-badge" target="_blank" rel="noopener">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.31.17.67.19 1 .07l13.06-7.57-2.9-2.9-11.16 10.4zm-1.08-20.7c-.07.21-.1.44-.1.67v16.54c0 .23.03.46.1.67l.07.06 9.26-9.27v-.21l-9.26-9.27-.07.06zm19.58 8.93-2.61-1.52-2.93 2.93 2.93 2.93 2.63-1.52c.75-.44.75-1.39-.02-1.82zM4.18.17l13.06 7.57-2.9 2.9L4.08.24l.1-.07z"/></svg>
+      <div class="store-badge-text">
+        <small>Get it on</small>
+        <strong>Google Play</strong>
+      </div>
+    </a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Funtech. All rights reserved.</p>
+    <a href="https://play.google.com/store/apps/details?id=com.ai.teleprompter.videoeditor.aiscript.generator" target="_blank" rel="noopener">Download app →</a>
+  </footer>
+
+</body>
+</html>
