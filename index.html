@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teleprompter – Script Reader</title>
+  <title>AI Teleprompter: Script Reader</title>
   <meta name="description" content="Generate scripts with AI, read while you record, and deliver every video with confidence. Free on Android." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -59,20 +61,26 @@
       flex-shrink: 0;
     }
     .nav-brand-text {
-      display: flex; flex-direction: column;
-      line-height: 1.1;
-    }
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  line-height: 1;
+}
     .nav-brand-name {
-      font-size: 17px; font-weight: 700;
-      color: var(--ink);
-      letter-spacing: -0.2px;
-    }
+  font-family: var(--font);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.4px;
+}
     .nav-brand-sub {
-      font-size: 10px; font-weight: 500;
-      color: var(--ink-3);
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
     .nav-cta {
       display: inline-flex; align-items: center; gap: 8px;
       background: var(--orange); color: #fff;
@@ -360,7 +368,7 @@
     <a href="#" class="nav-brand">
       <img src="logo.png" alt="Teleprompter app icon" class="nav-logo-img" />
       <div class="nav-brand-text">
-        <span class="nav-brand-name">Teleprompter</span>
+        <span class="nav-brand-name">AI Teleprompter</span>
         <span class="nav-brand-sub">Script Reader</span>
       </div>
     </a>
